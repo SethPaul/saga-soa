@@ -21,6 +21,9 @@
     }
   },
   "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^3.0.0",
+    "@nestjs/testing": "^11.0.0",
     "@saga/typescript-config": "workspace:*",
     "@types/jest": "^30.0.0",
     "@types/node": "latest",
@@ -36,6 +39,18 @@
     "reflect-metadata": "^0.2.2",
     "routing-controllers": "^0.11.2",
     "zod": "latest"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
+    "@nestjs/config": {
+      "optional": true
+    }
   },
   "version": "1.0.0"
 }
