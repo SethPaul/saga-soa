@@ -21,6 +21,7 @@ The configuration system is built around three main concepts:
 ### Configuration Schema
 
 Each configuration object must define a Zod schema that:
+
 - Includes a `configType` literal field to identify the configuration type
 - Specifies validation rules for each configuration field
 - Can be used to infer the TypeScript type
@@ -28,10 +29,10 @@ Each configuration object must define a Zod schema that:
 Example using the MongoProviderSchema from `@saga-soa/db`:
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const MongoProviderSchema = z.object({
-  configType: z.literal('MONGO'),
+  configType: z.literal("MONGO"),
   instanceName: z.string().min(1),
   host: z.string().min(1),
   port: z.number().int().positive(),
@@ -79,13 +80,13 @@ MONGO_PASSWORD=secret
 1. Define your configuration schema:
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const AppConfigSchema = z.object({
-  configType: z.literal('APP'),
+  configType: z.literal("APP"),
   port: z.number().int().positive(),
-  logLevel: z.enum(['debug', 'info', 'warn', 'error']),
-  apiKey: z.string().min(1)
+  logLevel: z.enum(["debug", "info", "warn", "error"]),
+  apiKey: z.string().min(1),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
@@ -102,16 +103,16 @@ APP_API_KEY=your-api-key
 3. Use the configuration manager:
 
 ```typescript
-import { Container } from 'inversify';
-import { IConfigManager, DotenvConfigManager } from '@saga-soa/config';
-import { AppConfigSchema } from './app-config';
+import { Container } from "inversify";
+import { IConfigManager, DotenvConfigManager } from "@saga-soa/config";
+import { AppConfigSchema } from "./app-config";
 
 // Set up dependency injection
 const container = new Container();
-container.bind<IConfigManager>('IConfigManager').to(DotenvConfigManager);
+container.bind<IConfigManager>("IConfigManager").to(DotenvConfigManager);
 
 // Get configuration
-const configManager = container.get<IConfigManager>('IConfigManager');
+const configManager = container.get<IConfigManager>("IConfigManager");
 const config = configManager.get(AppConfigSchema);
 
 // TypeScript knows the type!
@@ -124,19 +125,19 @@ console.log(config.logLevel); // 'debug' | 'info' | 'warn' | 'error'
 The package includes a `MockConfigManager` that generates valid mock data based on your schema:
 
 ```typescript
-import { Container } from 'inversify';
-import { IConfigManager, MockConfigManager } from '@saga-soa/config';
+import { Container } from "inversify";
+import { IConfigManager, MockConfigManager } from "@saga-soa/config";
 
-describe('MyService', () => {
+describe("MyService", () => {
   let container: Container;
-  
+
   beforeEach(() => {
     container = new Container();
-    container.bind<IConfigManager>('IConfigManager').to(MockConfigManager);
+    container.bind<IConfigManager>("IConfigManager").to(MockConfigManager);
   });
 
-  it('should work with mock config', () => {
-    const configManager = container.get<IConfigManager>('IConfigManager');
+  it("should work with mock config", () => {
+    const configManager = container.get<IConfigManager>("IConfigManager");
     const config = configManager.get(AppConfigSchema);
     // config will have valid mock values for all fields
   });

@@ -1,17 +1,17 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: [
-    'src/express-server.ts',
-    'src/express-server-schema.ts',
-    'src/rest/rest-endpoint-group.ts',
-    'src/rest/rest-router.ts'
+    "src/express-server.ts",
+    "src/express-server-schema.ts",
+    "src/rest/rest-endpoint-group.ts",
+    "src/rest/rest-router.ts",
   ],
-  format: ['esm'],
+  format: ["esm"],
   dts: true,
   sourcemap: true,
   clean: true,
-  outDir: 'dist',
+  outDir: "dist",
   splitting: false,
   skipNodeModulesBundle: true,
-}); 
+});

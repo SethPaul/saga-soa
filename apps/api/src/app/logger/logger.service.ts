@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface ILogger {
   info(message: string, data?: object): void;
@@ -30,8 +30,8 @@ export class LoggerService implements ILogger {
   }
 
   error(message: string, error?: Error, data?: object): void {
-    const errorInfo = error ? ` ${error.message}` : '';
-    const dataInfo = data ? ` ${JSON.stringify(data)}` : '';
+    const errorInfo = error ? ` ${error.message}` : "";
+    const dataInfo = data ? ` ${JSON.stringify(data)}` : "";
     this.logger.error(`${message}${errorInfo}${dataInfo}`, error?.stack);
   }
 

@@ -1,12 +1,15 @@
-import 'reflect-metadata';
-import { z, ZodObject, ZodRawShape, ZodLiteral } from 'zod';
-import dotenvFlow from 'dotenv-flow';
-import { injectable } from 'inversify';
+import "reflect-metadata";
+import { z, ZodObject, ZodRawShape, ZodLiteral } from "zod";
+import dotenvFlow from "dotenv-flow";
+import { injectable } from "inversify";
 
 export class ConfigValidationError extends Error {
-  constructor(public readonly configType: string, public readonly validationError: z.ZodError) {
+  constructor(
+    public readonly configType: string,
+    public readonly validationError: z.ZodError,
+  ) {
     super(`Configuration validation failed for ${configType}`);
-    this.name = 'ConfigValidationError';
+    this.name = "ConfigValidationError";
   }
 }
 
@@ -36,12 +39,12 @@ export class DotenvConfigManager implements IConfigManager {
     dotenvFlow.config();
     // Extract configType from schema (assumes a literal field named configType)
     const configType = (schema.shape as any).configType.value as string;
-    const prefix = configType.toUpperCase() + '_';
+    const prefix = configType.toUpperCase() + "_";
     const env = process.env;
     const input: Record<string, any> = {};
 
     for (const key in schema.shape) {
-      if (key === 'configType') continue;
+      if (key === "configType") continue;
       const envVar = prefix + key.toUpperCase();
       if (env[envVar] !== undefined) {
         input[key] = env[envVar];
@@ -72,15 +75,16 @@ export class MockConfigManager implements IConfigManager {
     const input: Record<string, any> = { configType };
 
     for (const [key, def] of Object.entries(schema.shape)) {
-      if (key === 'configType') continue;
-      
+      if (key === "configType") continue;
+
       // Generate mock data based on the Zod type
       if (def instanceof z.ZodString) {
-        input[key] = def.minLength || 0 ? 'mock'.padEnd(def.minLength || 3, 'x') : 'mock';
+        input[key] =
+          def.minLength || 0 ? "mock".padEnd(def.minLength || 3, "x") : "mock";
       } else if (def instanceof z.ZodNumber || def instanceof z.ZodEffects) {
-        input[key] = '42'; // String for preprocessed numbers
+        input[key] = "42"; // String for preprocessed numbers
       } else if (def instanceof z.ZodBoolean || def instanceof z.ZodEffects) {
-        input[key] = 'true'; // String for preprocessed booleans
+        input[key] = "true"; // String for preprocessed booleans
       } else if (def instanceof z.ZodEnum) {
         input[key] = def.options[0];
       } else if (def instanceof z.ZodOptional) {

@@ -15,7 +15,7 @@ A modern, scalable NestJS API application built with Nx monorepo tools, featurin
 
 ## 📋 Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - pnpm 9+
 - Docker and Docker Compose (for containerized deployment)
 - MongoDB (optional - application runs without database)
@@ -23,12 +23,14 @@ A modern, scalable NestJS API application built with Nx monorepo tools, featurin
 ## 🛠️ Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd saga-soa
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
@@ -80,22 +82,34 @@ pnpm exec nx test api
 # Run tests with coverage
 pnpm exec nx test api --coverage
 
+# Run CI tests (coverage + no watch)
+pnpm ci:test
+
 # Run specific test file
 pnpm exec nx test api --testNamePattern="CoreService"
 ```
 
+### Test Results
+
+- **36 tests** across 4 test suites
+- **All tests passing** in ~9 seconds
+- **Coverage reports** available in `coverage/` directory
+
 ## 📚 API Endpoints
 
 ### Health & Status
+
 - `GET /health` - Application health check
 - `GET /` - Basic API information
 
 ### Core Endpoints
+
 - `GET /saga-soa` - ASCII art splash screen
 - `GET /saga-soa/alive` - Sector alive status
 - `GET /saga-soa/:sector/alive` - Dynamic sector status
 
 ### Users Management (requires database)
+
 - `POST /users` - Create a new user
 - `GET /users` - List users (with pagination)
 - `GET /users/:id` - Get user by ID
@@ -106,6 +120,7 @@ pnpm exec nx test api --testNamePattern="CoreService"
 ## 🏗️ Architecture
 
 ### Project Structure
+
 ```
 apps/api/src/app/
 ├── core/           # Core business logic (migrated from Express)
@@ -177,25 +192,55 @@ docker run -p 3000:3000 \
 
 This project has been migrated from Express + Inversify to NestJS, providing:
 
-| Aspect | Before | After |
-|--------|---------|-------|
-| **DI Setup** | Manual Inversify containers | Automatic NestJS modules |
-| **Configuration** | Manual validation | Zod-based type-safe config |
-| **Testing** | Custom setup | Built-in testing utilities |
-| **Error Handling** | Custom middleware | Built-in exception filters |
-| **Development** | Manual restart | Hot reload with watch |
-| **Build System** | Turborepo | Nx with advanced caching |
+| Aspect             | Before                      | After                      |
+| ------------------ | --------------------------- | -------------------------- |
+| **DI Setup**       | Manual Inversify containers | Automatic NestJS modules   |
+| **Configuration**  | Manual validation           | Zod-based type-safe config |
+| **Testing**        | Custom setup                | Built-in testing utilities |
+| **Error Handling** | Custom middleware           | Built-in exception filters |
+| **Development**    | Manual restart              | Hot reload with watch      |
+| **Build System**   | Turborepo                   | Nx with advanced caching   |
+
+## 🔄 CI/CD
+
+This project includes comprehensive GitHub Actions workflows for continuous integration and deployment:
+
+### Workflows
+
+- **CI**: Code quality, testing, building, and security scanning
+- **Deploy**: Automated deployments to staging and production
+- **Dependencies**: Weekly automated dependency updates
+- **Performance**: Load testing and performance monitoring
+
+### Commands
+
+```bash
+# Test CI locally
+pnpm ci:lint          # Run linting
+pnpm ci:test          # Run tests with coverage
+pnpm ci:build         # Build all projects
+pnpm ci:check-types   # Type checking
+pnpm security:audit   # Security audit
+
+# Docker operations
+pnpm docker:build     # Build Docker image
+pnpm docker:run       # Run Docker container
+```
+
+For detailed CI/CD documentation, see [docs/CICD.md](docs/CICD.md).
 
 ## 🤝 Development
 
 ### Adding New Features
 
 1. **Create a new module**
+
    ```bash
    pnpm exec nx g @nx/nest:module feature-name apps/api
    ```
 
 2. **Add service and controller**
+
    ```bash
    pnpm exec nx g @nx/nest:service feature-name apps/api
    pnpm exec nx g @nx/nest:controller feature-name apps/api
@@ -214,6 +259,9 @@ pnpm exec nx lint api
 # Format code
 pnpm format
 
+# Check formatting
+pnpm format:check
+
 # Type check
 pnpm exec nx build api
 ```
@@ -225,6 +273,7 @@ This project is licensed under the MIT License.
 ## 🙋‍♂️ Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Check the API documentation at `/health` endpoint
 - Review the test files for usage examples

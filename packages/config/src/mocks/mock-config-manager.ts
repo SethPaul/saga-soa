@@ -1,8 +1,8 @@
-import 'reflect-metadata';
-import { z, ZodObject } from 'zod';
-import { injectable } from 'inversify';
-import { IConfigManager, HasConfigType } from '../i-config-manager';
-import { ConfigValidationError } from '../config-validation-error';
+import "reflect-metadata";
+import { z, ZodObject } from "zod";
+import { injectable } from "inversify";
+import { IConfigManager, HasConfigType } from "../i-config-manager";
+import { ConfigValidationError } from "../config-validation-error";
 
 @injectable()
 export class MockConfigManager implements IConfigManager {
@@ -16,15 +16,16 @@ export class MockConfigManager implements IConfigManager {
     const input: Record<string, any> = { configType };
 
     for (const [key, def] of Object.entries(schema.shape)) {
-      if (key === 'configType') continue;
-      
+      if (key === "configType") continue;
+
       // Generate mock data based on the Zod type
       if (def instanceof z.ZodString) {
-        input[key] = def.minLength || 0 ? 'mock'.padEnd(def.minLength || 3, 'x') : 'mock';
+        input[key] =
+          def.minLength || 0 ? "mock".padEnd(def.minLength || 3, "x") : "mock";
       } else if (def instanceof z.ZodNumber || def instanceof z.ZodEffects) {
-        input[key] = '42'; // String for preprocessed numbers
+        input[key] = "42"; // String for preprocessed numbers
       } else if (def instanceof z.ZodBoolean || def instanceof z.ZodEffects) {
-        input[key] = 'true'; // String for preprocessed booleans
+        input[key] = "true"; // String for preprocessed booleans
       } else if (def instanceof z.ZodEnum) {
         input[key] = def.options[0];
       } else if (def instanceof z.ZodOptional) {
@@ -41,4 +42,4 @@ export class MockConfigManager implements IConfigManager {
       throw err;
     }
   }
-} 
+}

@@ -1,11 +1,11 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 
 // Global test setup configuration
 beforeAll(() => {
   // Set test environment variables
-  process.env.NODE_ENV = 'test';
-  process.env.PORT = '3001';
-  process.env.APP_NAME = 'test-api';
+  process.env.NODE_ENV = "test";
+  process.env.PORT = "3001";
+  process.env.APP_NAME = "test-api";
 });
 
 afterAll(() => {

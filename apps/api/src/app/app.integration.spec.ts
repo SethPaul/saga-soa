@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from './app.module';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import request from "supertest";
+import { AppModule } from "./app.module";
 
-describe('AppController (Integration)', () => {
+describe("AppController (Integration)", () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -19,107 +19,107 @@ describe('AppController (Integration)', () => {
     await app.close();
   });
 
-  describe('Health Endpoints', () => {
-    it('/health (GET)', () => {
+  describe("Health Endpoints", () => {
+    it("/health (GET)", () => {
       return request(app.getHttpServer())
-        .get('/health')
+        .get("/health")
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('status', 'ok');
-          expect(res.body).toHaveProperty('timestamp');
+          expect(res.body).toHaveProperty("status", "ok");
+          expect(res.body).toHaveProperty("timestamp");
         });
     });
 
-    it('/ (GET)', () => {
+    it("/ (GET)", () => {
       return request(app.getHttpServer())
-        .get('/')
+        .get("/")
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('message', 'Hello API');
+          expect(res.body).toHaveProperty("message", "Hello API");
         });
     });
   });
 
-  describe('Core Endpoints', () => {
-    it('/saga-soa/alive (GET)', () => {
+  describe("Core Endpoints", () => {
+    it("/saga-soa/alive (GET)", () => {
       return request(app.getHttpServer())
-        .get('/saga-soa/alive')
+        .get("/saga-soa/alive")
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({
-            status: 'alive',
-            sector: 'SAGA-SOA',
+            status: "alive",
+            sector: "SAGA-SOA",
           });
         });
     });
 
-    it('/saga-soa (GET) - should return ASCII art', () => {
+    it("/saga-soa (GET) - should return ASCII art", () => {
       return request(app.getHttpServer())
-        .get('/saga-soa')
+        .get("/saga-soa")
         .expect(200)
-        .expect('Content-Type', /html/)
+        .expect("Content-Type", /html/)
         .expect((res) => {
           expect(res.text).toMatch(/^<pre>.*<\/pre>$/s);
         });
     });
 
-    it('/saga-soa/:sector/alive (GET)', () => {
+    it("/saga-soa/:sector/alive (GET)", () => {
       return request(app.getHttpServer())
-        .get('/saga-soa/TEST/alive')
+        .get("/saga-soa/TEST/alive")
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({
-            status: 'alive',
-            sector: 'TEST',
+            status: "alive",
+            sector: "TEST",
           });
         });
     });
   });
 
-  describe('Error Handling', () => {
-    it('should return 404 for non-existent routes', () => {
+  describe("Error Handling", () => {
+    it("should return 404 for non-existent routes", () => {
       return request(app.getHttpServer())
-        .get('/non-existent-route')
+        .get("/non-existent-route")
         .expect(404);
     });
 
-    it('should handle malformed requests gracefully', () => {
+    it("should handle malformed requests gracefully", () => {
       return request(app.getHttpServer())
-        .post('/saga-soa')
-        .send('invalid json')
+        .post("/saga-soa")
+        .send("invalid json")
         .expect(404); // POST not allowed on this route
     });
   });
 
-  describe('Users Endpoints (Without Database)', () => {
-    it('/users (GET) - should handle database connection gracefully', () => {
+  describe("Users Endpoints (Without Database)", () => {
+    it("/users (GET) - should handle database connection gracefully", () => {
       return request(app.getHttpServer())
-        .get('/users')
+        .get("/users")
         .expect(500) // Expected to fail without database
         .expect((res) => {
-          expect(res.body).toHaveProperty('statusCode', 500);
-          expect(res.body).toHaveProperty('message');
+          expect(res.body).toHaveProperty("statusCode", 500);
+          expect(res.body).toHaveProperty("message");
         });
     });
 
-    it('/users/stats (GET) - should handle database connection gracefully', () => {
+    it("/users/stats (GET) - should handle database connection gracefully", () => {
       return request(app.getHttpServer())
-        .get('/users/stats')
+        .get("/users/stats")
         .expect(500) // Expected to fail without database
         .expect((res) => {
-          expect(res.body).toHaveProperty('statusCode', 500);
-          expect(res.body).toHaveProperty('message');
+          expect(res.body).toHaveProperty("statusCode", 500);
+          expect(res.body).toHaveProperty("message");
         });
     });
 
-    it('should validate user creation data', () => {
+    it("should validate user creation data", () => {
       return request(app.getHttpServer())
-        .post('/users')
+        .post("/users")
         .send({}) // Empty body should trigger validation
         .expect(400) // Bad request due to validation
         .expect((res) => {
-          expect(res.body).toHaveProperty('statusCode', 400);
-          expect(res.body).toHaveProperty('message');
+          expect(res.body).toHaveProperty("statusCode", 400);
+          expect(res.body).toHaveProperty("message");
         });
     });
   });

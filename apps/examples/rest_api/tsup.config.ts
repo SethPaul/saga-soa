@@ -5,4 +5,4 @@ export default defineConfig((options: Options) => ({
   clean: true,
   format: ["esm"],
   ...options,
-})); 
+}));

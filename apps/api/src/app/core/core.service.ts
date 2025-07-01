@@ -1,6 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as figlet from 'figlet';
+import { Injectable, Inject } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as figlet from "figlet";
 
 export interface ICoreService {
   getSectorSplash(sectorName: string): string;
@@ -14,7 +14,7 @@ export class CoreService implements ICoreService {
 
   getSectorSplash(sectorName: string): string {
     try {
-      const splash = figlet.textSync(sectorName, { font: 'Big' });
+      const splash = figlet.textSync(sectorName, { font: "Big" });
       return `<pre>${splash}</pre>`;
     } catch (error) {
       // Fallback if figlet fails
@@ -23,13 +23,13 @@ export class CoreService implements ICoreService {
   }
 
   getAliveStatus(sectorName: string): { status: string; sector: string } {
-    return { status: 'alive', sector: sectorName };
+    return { status: "alive", sector: sectorName };
   }
 
   getServerInfo(): { name: string; port: number } {
     return {
-      name: this.configService.get<string>('APP_NAME', 'saga-soa'),
-      port: this.configService.get<number>('PORT', 3000),
+      name: this.configService.get<string>("APP_NAME", "saga-soa"),
+      port: this.configService.get<number>("PORT", 3000),
     };
   }
 }

@@ -1,36 +1,36 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { CoreService } from './core.service';
+import { Controller, Get, Param } from "@nestjs/common";
+import { CoreService } from "./core.service";
 
-@Controller('saga-soa')
+@Controller("saga-soa")
 export class CoreController {
   constructor(private readonly coreService: CoreService) {}
 
   @Get()
   getHome(): string {
-    return this.coreService.getSectorSplash('SAGA-SOA');
+    return this.coreService.getSectorSplash("SAGA-SOA");
   }
 
-  @Get('alive')
+  @Get("alive")
   getAlive() {
-    return this.coreService.getAliveStatus('SAGA-SOA');
+    return this.coreService.getAliveStatus("SAGA-SOA");
   }
 
-  @Get('health')
+  @Get("health")
   getHealth() {
-    return { 
-      status: 'ok', 
+    return {
+      status: "ok",
       timestamp: new Date().toISOString(),
-      ...this.coreService.getServerInfo()
+      ...this.coreService.getServerInfo(),
     };
   }
 
-  @Get(':sector')
-  getSectorHome(@Param('sector') sector: string): string {
+  @Get(":sector")
+  getSectorHome(@Param("sector") sector: string): string {
     return this.coreService.getSectorSplash(sector);
   }
 
-  @Get(':sector/alive')
-  getSectorAlive(@Param('sector') sector: string) {
+  @Get(":sector/alive")
+  getSectorAlive(@Param("sector") sector: string) {
     return this.coreService.getAliveStatus(sector);
   }
 }

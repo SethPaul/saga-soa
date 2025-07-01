@@ -1,13 +1,13 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongoClient } from 'mongodb';
-import { IMongoProvider } from '../i-mongo-connection-manager';
+import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongoClient } from "mongodb";
+import { IMongoProvider } from "../i-mongo-connection-manager";
 
 export class MockMongoProvider implements IMongoProvider {
   public readonly instanceName: string;
   private client: MongoClient | null = null;
   private mongoServer: MongoMemoryServer | null = null;
 
-  constructor(instanceName: string = 'MockMongoDB') {
+  constructor(instanceName: string = "MockMongoDB") {
     this.instanceName = instanceName;
   }
 
@@ -35,8 +35,8 @@ export class MockMongoProvider implements IMongoProvider {
 
   getClient(): MongoClient {
     if (!this.client) {
-      throw new Error('MongoClient is not connected');
+      throw new Error("MongoClient is not connected");
     }
     return this.client;
   }
-} 
+}

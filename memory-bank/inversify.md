@@ -14,6 +14,7 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
 #### Requirements
 
 1. **Interface-Based Design**
+
    - All concrete implementations must be abstracted behind interfaces
    - Services should be defined using TypeScript interfaces
    - Dependencies should be injected through constructor parameters
@@ -37,18 +38,21 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
      ```
 
 2. **Metadata-Based Binding**
+
    - Utilize TypeScript's emitted decorator metadata to automatically bind implementations to interfaces
    - Avoid manual creation of service identifiers where possible
    - Use `@injectable()` decorator on concrete implementations
    - Use `@inject()` decorator for constructor parameter injection
 
 3. **Container Configuration**
+
    - Each submodule should export its own container configuration
    - Container configurations should be composable across the monorepo
    - Use `container.bind<Interface>().to(Implementation)` pattern
    - Leverage TypeScript's type system to ensure type safety
 
 4. **File Structure**
+
    ```
    src/
    ├── interfaces/
@@ -62,6 +66,7 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
    ```
 
 5. **Example Implementation**
+
    ```typescript
    // interfaces/i-user-service.ts
    export interface IUserService {
@@ -69,12 +74,12 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
    }
 
    // implementations/user-service.ts
-   import { IUserService } from '../interfaces/i-user-service';
-   
+   import { IUserService } from "../interfaces/i-user-service";
+
    @injectable()
    export class UserService implements IUserService {
      constructor(
-       @inject('IUserRepository') private userRepository: IUserRepository
+       @inject("IUserRepository") private userRepository: IUserRepository,
      ) {}
 
      async getUser(id: string): Promise<User> {
@@ -84,7 +89,7 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
 
    // Container configuration
    const container = new Container();
-   container.bind<IUserService>('IUserService').to(UserService);
+   container.bind<IUserService>("IUserService").to(UserService);
    ```
 
 6. **Best Practices**
@@ -93,10 +98,10 @@ The saga-soa project is the root project of a turborepo managed monorepo. There 
    - Document interfaces with JSDoc comments
    - Use dependency injection for all external dependencies
    - Avoid circular dependencies between modules
-   - Place mock implementations in __tests__ directory
+   - Place mock implementations in **tests** directory
    - Configure package exports to support interface-only imports
    - Use type-only exports for interfaces in index.ts:
      ```typescript
-     export type { IServiceName } from './interfaces/i-service-name';
-     export { ServiceName } from './implementations/service-name';
+     export type { IServiceName } from "./interfaces/i-service-name";
+     export { ServiceName } from "./implementations/service-name";
      ```
