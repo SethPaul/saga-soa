@@ -96,13 +96,13 @@ container.bind<IUserService>('IUserService').to(UserService);
 export { container };
 ```
 
-### After: NestJS Module System
+### After: NestJS Module System ✅ IMPLEMENTED
 ```typescript
 // apps/api/src/app/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from '@saga-soa/logger';
-import { UserModule } from './user/user.module';
+import { LoggerModule } from './logger/logger.module';
+import { CoreModule } from './core/core.module';
 
 @Module({
   imports: [
@@ -110,18 +110,20 @@ import { UserModule } from './user/user.module';
       isGlobal: true,
     }),
     LoggerModule,
-    UserModule,
+    CoreModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
 
-// apps/api/src/app/user/user.module.ts
+// apps/api/src/app/core/core.module.ts
 @Module({
-  providers: [UserService],
-  controllers: [UserController],
-  exports: [UserService],
+  controllers: [CoreController],
+  providers: [CoreService],
+  exports: [CoreService],
 })
-export class UserModule {}
+export class CoreModule {}
 ```
 
 **Key Improvements:**
