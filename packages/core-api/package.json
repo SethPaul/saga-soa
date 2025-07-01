@@ -6,6 +6,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./rest/rest-endpoint-group": {
       "types": "./dist/rest/rest-endpoint-group.d.ts",
       "default": "./dist/rest/rest-endpoint-group.js"
@@ -15,8 +19,8 @@
       "default": "./dist/rest/rest-router.js"
     },
     "./rest-controller": {
-      "types": "./dist/rest/rest-controller.d.ts",
-      "default": "./dist/rest/rest-controller.js"
+      "types": "./dist/rest-controller.d.ts",
+      "default": "./dist/rest-controller.js"
     }
   },
   "scripts": {
@@ -35,7 +39,17 @@
     "routing-controllers": "^0.11.2",
     "zod": "^3.22.2"
   },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
     "@types/express": "^5.0.3",
     "@types/figlet": "^1.7.0",
     "@types/jest": "^29.5.3",

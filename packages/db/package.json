@@ -8,6 +8,10 @@
     "clean": "rm -rf dist"
   },
   "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./sql": {
       "types": "./src/sql.ts",
       "default": "./dist/sql.js"
@@ -18,6 +22,8 @@
     }
   },
   "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
     "@saga-soa/config": "workspace:*",
     "@saga/typescript-config": "workspace:*",
     "@types/jest": "^30.0.0",
@@ -33,6 +39,14 @@
     "mongodb": "^5.7.0",
     "reflect-metadata": "^0.1.13",
     "zod": "^3.22.2"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    }
   },
   "version": "1.0.0"
 }

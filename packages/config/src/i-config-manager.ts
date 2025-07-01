@@ -1,4 +1,4 @@
-import { z, ZodObject, ZodRawShape, ZodLiteral } from 'zod';
+import { z, ZodObject, ZodRawShape, ZodLiteral } from "zod";
 
 export type HasConfigType = ZodRawShape & {
   configType: ZodLiteral<any>;
@@ -12,4 +12,4 @@ export interface IConfigManager {
    * @throws ConfigValidationError if validation fails
    */
   get<T extends HasConfigType>(schema: ZodObject<T>): z.infer<ZodObject<T>>;
-} 
+}

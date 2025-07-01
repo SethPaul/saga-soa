@@ -1,7 +1,7 @@
-import { injectable } from 'inversify';
-import { MongoClient } from 'mongodb';
-import { IMongoProvider } from './i-mongo-connection-manager';
-import type { MongoProviderConfig } from './mongo-provider-config';
+import { injectable } from "inversify";
+import { MongoClient } from "mongodb";
+import { IMongoProvider } from "./i-mongo-connection-manager";
+import type { MongoProviderConfig } from "./mongo-provider-config";
 
 @injectable()
 export class MongoProvider implements IMongoProvider {
@@ -34,14 +34,14 @@ export class MongoProvider implements IMongoProvider {
 
   getClient(): MongoClient {
     if (!this.client) {
-      throw new Error('MongoClient is not connected');
+      throw new Error("MongoClient is not connected");
     }
     return this.client;
   }
 
   private _buildConnectionString(): string {
     const { host, port, database, username, password } = this.config;
-    let auth = '';
+    let auth = "";
     if (username && password) {
       auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`;
     }
@@ -49,5 +49,7 @@ export class MongoProvider implements IMongoProvider {
   }
 }
 
-export const MongoProviderFactory = Symbol('MongoProviderFactory');
-export type MongoProviderFactory = (config: MongoProviderConfig) => MongoProvider; 
+export const MongoProviderFactory = Symbol("MongoProviderFactory");
+export type MongoProviderFactory = (
+  config: MongoProviderConfig,
+) => MongoProvider;

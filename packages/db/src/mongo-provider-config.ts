@@ -1,8 +1,8 @@
-import { z, ZodObject }  from 'zod';
-import { HasConfigType } from '@saga-soa/config';
+import { z, ZodObject } from "zod";
+import { HasConfigType } from "@saga-soa/config";
 
 export const MongoProviderSchema: ZodObject<HasConfigType> = z.object({
-  configType: z.literal('MONGO'),
+  configType: z.literal("MONGO"),
   instanceName: z.string().min(1),
   host: z.string().min(1),
   port: z.number().int().positive(),

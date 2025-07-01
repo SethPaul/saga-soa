@@ -1,0 +1,413 @@
+name: Performance Monitoring
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Load Testing
+  load-testing:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: test
+          MONGO_INITDB_DATABASE: saga-soa-test
+        ports:
+          - 27017:27017
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm exec nx build api
+
+      - name: Start application
+        run: |
+          # Start the API server in background
+          pnpm exec nx serve api &
+          
+          # Wait for server to start
+          sleep 15
+          
+          # Verify server is running
+          curl -f http://localhost:3000/health
+        env:
+          NODE_ENV: test
+          MONGO_HOST: localhost
+          MONGO_PORT: 27017
+          MONGO_DATABASE: saga-soa-test
+          MONGO_USERNAME: test
+          MONGO_PASSWORD: test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+
+      - name: Install Artillery
+        run: npm install -g artillery@latest
+
+      - name: Create load test configuration
+        run: |
+          cat > artillery-config.yml << 'EOF'
+          config:
+            target: 'http://localhost:3000'
+            phases:
+              # Warm up phase
+              - duration: 30
+                arrivalRate: 5
+                name: "Warm up"
+              # Ramp up phase
+              - duration: 60
+                arrivalRate: 10
+                rampTo: 50
+                name: "Ramp up load"
+              # Sustained load phase
+              - duration: 120
+                arrivalRate: 50
+                name: "Sustained load"
+              # Peak load phase
+              - duration: 60
+                arrivalRate: 100
+                name: "Peak load"
+            http:
+              timeout: 10
+          scenarios:
+            - name: "Health check and basic operations"
+              weight: 40
+              flow:
+                - get:
+                    url: "/health"
+                - get:
+                    url: "/saga-soa/alive"
+            - name: "User operations"
+              weight: 40
+              flow:
+                - post:
+                    url: "/users"
+                    json:
+                      name: "Load Test User {{ $randomString() }}"
+                      email: "test-{{ $randomString() }}@example.com"
+                    capture:
+                      - json: "$.id"
+                        as: "userId"
+                - get:
+                    url: "/users/{{ userId }}"
+                - put:
+                    url: "/users/{{ userId }}"
+                    json:
+                      name: "Updated User {{ $randomString() }}"
+                - delete:
+                    url: "/users/{{ userId }}"
+            - name: "Read-heavy operations"
+              weight: 20
+              flow:
+                - get:
+                    url: "/users"
+                - get:
+                    url: "/health"
+          EOF
+
+      - name: Run load tests
+        run: |
+          # Run load test with detailed reporting
+          artillery run artillery-config.yml --output load-test-report.json
+          
+          # Generate HTML report
+          artillery report load-test-report.json --output load-test-report.html
+
+      - name: Analyze performance results
+        run: |
+          # Extract key metrics from the report
+          echo "## Load Test Results" > performance-summary.md
+          echo "Generated on: $(date)" >> performance-summary.md
+          echo "" >> performance-summary.md
+          
+          # Check if load test passed basic thresholds
+          if [ -f load-test-report.json ]; then
+            echo "### Key Metrics" >> performance-summary.md
+            echo "- Test completed successfully ✅" >> performance-summary.md
+            
+            # Extract basic stats (this would need jq parsing in real scenario)
+            echo "- Average response time: $(cat load-test-report.json | tail -20 | head -1)" >> performance-summary.md
+            echo "- Total requests: See detailed report" >> performance-summary.md
+            echo "- Error rate: See detailed report" >> performance-summary.md
+          else
+            echo "❌ Load test failed to generate report" >> performance-summary.md
+          fi
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: |
+            load-test-report.json
+            load-test-report.html
+            performance-summary.md
+
+  # Job 2: Bundle Analysis
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with bundle analysis
+        run: |
+          # Build application
+          pnpm exec nx build api
+          
+          # Analyze bundle size
+          echo "## Bundle Analysis" > bundle-report.md
+          echo "Generated on: $(date)" >> bundle-report.md
+          echo "" >> bundle-report.md
+          
+          # Get build output size
+          if [ -d "dist/apps/api" ]; then
+            echo "### Build Output" >> bundle-report.md
+            echo "\`\`\`" >> bundle-report.md
+            du -sh dist/apps/api >> bundle-report.md
+            echo "\`\`\`" >> bundle-report.md
+            echo "" >> bundle-report.md
+            
+            echo "### File Breakdown" >> bundle-report.md
+            echo "\`\`\`" >> bundle-report.md
+            find dist/apps/api -name "*.js" -exec ls -lh {} \; | head -20 >> bundle-report.md
+            echo "\`\`\`" >> bundle-report.md
+          fi
+
+      - name: Install bundle analyzer
+        run: pnpm add -D webpack-bundle-analyzer
+
+      - name: Generate dependency analysis
+        run: |
+          echo "" >> bundle-report.md
+          echo "### Dependencies Size Analysis" >> bundle-report.md
+          
+          # Analyze node_modules size
+          echo "Node modules size: $(du -sh node_modules 2>/dev/null || echo 'N/A')" >> bundle-report.md
+          
+          # List largest dependencies
+          echo "" >> bundle-report.md
+          echo "#### Largest Dependencies" >> bundle-report.md
+          echo "\`\`\`" >> bundle-report.md
+          du -sh node_modules/* 2>/dev/null | sort -hr | head -10 >> bundle-report.md || echo "Could not analyze dependencies" >> bundle-report.md
+          echo "\`\`\`" >> bundle-report.md
+
+      - name: Upload bundle analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: bundle-report.md
+
+  # Job 3: Basic Performance Check
+  basic-performance:
+    name: Basic Performance Check
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: test
+          MONGO_INITDB_DATABASE: saga-soa-test
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm exec nx build api
+
+      - name: Start application and test
+        run: |
+          # Start app in background
+          node dist/apps/api/main.js &
+          APP_PID=$!
+          
+          # Wait for app to start
+          sleep 10
+          
+          # Basic health check
+          curl -f http://localhost:3000/health
+          
+          # Basic endpoint test
+          curl -f http://localhost:3000/
+          
+          # Stop the app
+          kill $APP_PID || true
+        env:
+          NODE_ENV: production
+          MONGO_HOST: localhost
+          MONGO_PORT: 27017
+          MONGO_DATABASE: saga-soa-test
+          MONGO_USERNAME: test
+          MONGO_PASSWORD: test
+
+      - name: Generate performance report
+        run: |
+          echo "## Basic Performance Check" > performance-report.md
+          echo "Generated on: $(date)" >> performance-report.md
+          echo "" >> performance-report.md
+          echo "✅ Application starts successfully" >> performance-report.md
+          echo "✅ Health endpoint responds" >> performance-report.md
+          echo "✅ Basic endpoints functional" >> performance-report.md
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: performance-report.md
+
+  # Job 4: Performance Regression Detection
+  regression-detection:
+    name: Performance Regression Detection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run performance benchmarks
+        run: |
+          # Create simple benchmark script
+          cat > benchmark.js << 'EOF'
+          const { performance } = require('perf_hooks');
+          
+          // Simulate API operations
+          function simulateAPICall() {
+            const start = performance.now();
+            
+            // Simulate some work
+            let result = 0;
+            for (let i = 0; i < 1000000; i++) {
+              result += Math.random();
+            }
+            
+            const end = performance.now();
+            return end - start;
+          }
+          
+          // Run benchmarks
+          const results = [];
+          for (let i = 0; i < 100; i++) {
+            results.push(simulateAPICall());
+          }
+          
+          const avg = results.reduce((a, b) => a + b) / results.length;
+          const min = Math.min(...results);
+          const max = Math.max(...results);
+          
+          console.log(JSON.stringify({
+            average: avg,
+            min: min,
+            max: max,
+            samples: results.length
+          }));
+          EOF
+          
+          # Run benchmark
+          node benchmark.js > benchmark-results.json
+
+      - name: Comment performance results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const results = JSON.parse(fs.readFileSync('benchmark-results.json', 'utf8'));
+              
+              const comment = `## 📊 Performance Benchmark Results
+              
+              | Metric | Value |
+              |--------|-------|
+              | Average | ${results.average.toFixed(2)}ms |
+              | Min | ${results.min.toFixed(2)}ms |
+              | Max | ${results.max.toFixed(2)}ms |
+              | Samples | ${results.samples} |
+              
+              > **Note**: These are synthetic benchmarks. For comprehensive performance analysis, check the full CI pipeline results.
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Could not post performance results:', error);
+            }

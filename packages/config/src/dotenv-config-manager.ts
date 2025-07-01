@@ -1,9 +1,9 @@
-import 'reflect-metadata';
-import { z, ZodObject } from 'zod';
-import dotenvFlow from 'dotenv-flow';
-import { injectable } from 'inversify';
-import { IConfigManager, HasConfigType } from './i-config-manager';
-import { ConfigValidationError } from './config-validation-error';
+import "reflect-metadata";
+import { z, ZodObject } from "zod";
+import dotenvFlow from "dotenv-flow";
+import { injectable } from "inversify";
+import { IConfigManager, HasConfigType } from "./i-config-manager";
+import { ConfigValidationError } from "./config-validation-error";
 
 @injectable()
 export class DotenvConfigManager implements IConfigManager {
@@ -17,12 +17,12 @@ export class DotenvConfigManager implements IConfigManager {
     dotenvFlow.config();
     // Extract configType from schema (assumes a literal field named configType)
     const configType = (schema.shape as any).configType.value as string;
-    const prefix = configType.toUpperCase() + '_';
+    const prefix = configType.toUpperCase() + "_";
     const env = process.env;
     const input: Record<string, any> = {};
 
     for (const key in schema.shape) {
-      if (key === 'configType') continue;
+      if (key === "configType") continue;
       const envVar = prefix + key.toUpperCase();
       if (env[envVar] !== undefined) {
         input[key] = env[envVar];
@@ -39,4 +39,4 @@ export class DotenvConfigManager implements IConfigManager {
       throw err;
     }
   }
-} 
+}
