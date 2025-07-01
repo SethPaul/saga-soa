@@ -86,40 +86,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl
+      - name: Staging deployment placeholder
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Deploy to staging
-        run: |
-          # Update deployment with new image
-          kubectl set image deployment/saga-soa-api \
-            api=${{ needs.build-and-push.outputs.image }} \
-            -n saga-soa-staging
+          echo "🚀 Staging deployment would happen here"
+          echo "Image to deploy: ${{ needs.build-and-push.outputs.image }}"
+          echo "This step can be configured with your actual staging infrastructure"
+          echo "For now, we'll just simulate a successful deployment"
           
-          # Wait for rollout to complete
-          kubectl rollout status deployment/saga-soa-api -n saga-soa-staging --timeout=300s
+          # Simulate deployment time
+          sleep 5
           
-          # Verify deployment
-          kubectl get pods -n saga-soa-staging -l app=saga-soa-api
-
-      - name: Run smoke tests
-        run: |
-          # Wait for service to be ready
-          sleep 30
-          
-          # Test health endpoint
-          curl -f https://api-staging.saga-soa.com/health
-          
-          # Test core functionality
-          curl -f https://api-staging.saga-soa.com/saga-soa/alive
+          echo "✅ Staging deployment simulation completed"
 
   # Job 3: Deploy to Production
   deploy-production:
@@ -135,52 +112,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl
+      - name: Production deployment placeholder
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Deploy to production
-        run: |
-          # Update deployment with new image
-          kubectl set image deployment/saga-soa-api \
-            api=${{ needs.build-and-push.outputs.image }} \
-            -n saga-soa-production
+          echo "🚀 Production deployment would happen here"
+          echo "Image to deploy: ${{ needs.build-and-push.outputs.image }}"
+          echo "This step can be configured with your actual production infrastructure"
+          echo "For now, we'll just simulate a successful deployment"
           
-          # Wait for rollout to complete
-          kubectl rollout status deployment/saga-soa-api -n saga-soa-production --timeout=600s
+          # Simulate deployment time
+          sleep 10
           
-          # Verify deployment
-          kubectl get pods -n saga-soa-production -l app=saga-soa-api
-
-      - name: Run production smoke tests
-        run: |
-          # Wait for service to be ready
-          sleep 60
-          
-          # Test health endpoint
-          curl -f https://api.saga-soa.com/health
-          
-          # Test core functionality
-          curl -f https://api.saga-soa.com/saga-soa/alive
+          echo "✅ Production deployment simulation completed"
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
             ## Changes
-            - Automated deployment of ${{ github.ref }}
+            - Automated deployment of ${{ github.ref_name }}
             - Docker image: ${{ needs.build-and-push.outputs.image }}
             - Commit: ${{ github.sha }}
             

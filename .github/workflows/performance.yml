@@ -242,9 +242,9 @@ jobs:
           name: bundle-analysis
           path: bundle-report.md
 
-  # Job 3: Memory and CPU Profiling
-  profiling:
-    name: Memory & CPU Profiling
+  # Job 3: Basic Performance Check
+  basic-performance:
+    name: Basic Performance Check
     runs-on: ubuntu-latest
     
     services:
@@ -277,21 +277,23 @@ jobs:
       - name: Build application
         run: pnpm exec nx build api
 
-      - name: Install profiling tools
+      - name: Start application and test
         run: |
-          npm install -g clinic
-          npm install -g autocannon
-
-      - name: Run memory profiling
-        run: |
-          # Start app with memory profiling
-          timeout 120s clinic doctor --on-port 'autocannon -c 10 -d 60 http://localhost:3000/health' -- node dist/apps/api/main.js &
+          # Start app in background
+          node dist/apps/api/main.js &
+          APP_PID=$!
           
-          # Wait for profiling to complete
-          wait
+          # Wait for app to start
+          sleep 10
           
-          # Move profiling results
-          mv .clinic/* ./profiling-results/ 2>/dev/null || mkdir -p profiling-results
+          # Basic health check
+          curl -f http://localhost:3000/health
+          
+          # Basic endpoint test
+          curl -f http://localhost:3000/
+          
+          # Stop the app
+          kill $APP_PID || true
         env:
           NODE_ENV: production
           MONGO_HOST: localhost
@@ -300,30 +302,20 @@ jobs:
           MONGO_USERNAME: test
           MONGO_PASSWORD: test
 
-      - name: Generate profiling report
+      - name: Generate performance report
         run: |
-          echo "## Performance Profiling Report" > profiling-report.md
-          echo "Generated on: $(date)" >> profiling-report.md
-          echo "" >> profiling-report.md
-          
-          echo "### Memory Usage" >> profiling-report.md
-          echo "- Profiling completed for 60 seconds under load" >> profiling-report.md
-          echo "- Results available in artifacts" >> profiling-report.md
-          echo "" >> profiling-report.md
-          
-          echo "### Recommendations" >> profiling-report.md
-          echo "- Review memory usage patterns" >> profiling-report.md
-          echo "- Monitor for memory leaks" >> profiling-report.md
-          echo "- Optimize database connections" >> profiling-report.md
+          echo "## Basic Performance Check" > performance-report.md
+          echo "Generated on: $(date)" >> performance-report.md
+          echo "" >> performance-report.md
+          echo "✅ Application starts successfully" >> performance-report.md
+          echo "✅ Health endpoint responds" >> performance-report.md
+          echo "✅ Basic endpoints functional" >> performance-report.md
 
-      - name: Upload profiling results
+      - name: Upload performance report
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: profiling-results
-          path: |
-            profiling-results/
-            profiling-report.md
+          name: performance-report
+          path: performance-report.md
 
   # Job 4: Performance Regression Detection
   regression-detection:

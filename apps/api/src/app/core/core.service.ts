@@ -1,4 +1,4 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as figlet from "figlet";
 
@@ -16,7 +16,7 @@ export class CoreService implements ICoreService {
     try {
       const splash = figlet.textSync(sectorName, { font: "Big" });
       return `<pre>${splash}</pre>`;
-    } catch (error) {
+    } catch {
       // Fallback if figlet fails
       return `<h1>${sectorName}</h1>`;
     }

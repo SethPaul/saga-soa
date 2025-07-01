@@ -145,7 +145,7 @@ export class UsersController {
     }
 
     const user = await this.usersService.findUserById(id);
-    const { createdAt, updatedAt, ...profile } = user;
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...profile } = user;
 
     return {
       message: "User profile retrieved successfully",

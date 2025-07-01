@@ -51,7 +51,7 @@ jobs:
           pnpm install
           
           # Run tests to ensure updates don't break functionality
-          pnpm exec nx test api --watchAll=false
+          pnpm ci:test
           
           # Build to ensure no compilation errors
           pnpm exec nx build api

@@ -50,6 +50,12 @@
           "coverageReporters": ["text"]
         }
       }
+    },
+    "check-types": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p apps/api/tsconfig.json"
+      }
     }
   }
 }
