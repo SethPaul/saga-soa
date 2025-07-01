@@ -20,8 +20,7 @@
     "ci:check-types": "pnpm exec nx run-many -t check-types --parallel=3",
     "docker:build": "docker build -f apps/api/Dockerfile -t saga-soa-api .",
     "docker:run": "docker run -p 3000:3000 saga-soa-api",
-    "security:audit": "pnpm audit --audit-level moderate",
-    "prepare": "pnpm install --frozen-lockfile"
+    "security:audit": "pnpm audit --audit-level moderate"
   },
   "devDependencies": {
     "@nestjs/schematics": "^11.0.0",
